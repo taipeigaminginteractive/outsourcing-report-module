@@ -1,0 +1,42 @@
+name: CI
+on: [workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services: {} # 不用 GitHub services，改用 compose
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ---------- infra ----------
+      - name: Start DB & Redis
+        run: docker compose -f docker/docker-compose.ci.yml up -d
+
+      - name: Wait for postgres
+        run: |
+          until pg_isready -h localhost -p 5432 -U test; do sleep 2; done
+
+      # ---------- backend ----------
+      - name: Backend setup
+        run: |
+          cd backend
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pytest
+
+      # ---------- frontend ----------
+      - name: Frontend setup
+        run: |
+          cd frontend
+          npm ci
+          npm run test
+
+      # ---------- e2e ----------
+      - name: Playwright
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+          npx playwright test
