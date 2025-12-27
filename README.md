@@ -22,7 +22,6 @@ This repository is only used for task-based outsourcing.
 - **不會** 提供即時溝通或討論機制
 - 此 Repository **不代表** 內部架構或正式上線系統
 
-
 ## How to Participate
 
 1. Confirm task details with the repository owner
